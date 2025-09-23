@@ -1,16 +1,16 @@
 import pygame
 import node
 
-WIDTH, HEIGHT = 800, 600
+WIDTH = 800
 ROW_COLS = 20
 NODE_SIZE = WIDTH // ROW_COLS
 
 pygame.init()
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A* Pathfinding Visualization")
 
-start_exist = False
-end_exist = False
+start_node = None
+end_node = None
 
 def main():
     grid = init_grid()
@@ -30,12 +30,12 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    reset_grid(grid)
+                    grid = init_grid()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    pass  # Placeholder for starting the A* algorithm
-
+                if event.key == pygame.K_SPACE and start_node and end_node:
+                    a_star_algorithm(start_node, end_node, grid)
+                    
         WIN.fill((255, 255, 255))
         draw_grid(grid)
         pygame.display.update()
@@ -45,6 +45,9 @@ def main():
 # Function to initialize the grid with Node instances and set neighbors
 def init_grid():
     grid = []
+    global start_node, end_node
+    start_node = None
+    end_node = None
     for i in range(ROW_COLS):
         row = []
         for j in range(ROW_COLS):
@@ -73,7 +76,7 @@ def draw_grid(grid):
             pygame.draw.rect(WIN, node.color, (node.x * NODE_SIZE, node.y * NODE_SIZE, NODE_SIZE, NODE_SIZE))
     
     for i in range(ROW_COLS+1):
-        pygame.draw.line(WIN, (200, 200, 200), (i * NODE_SIZE, 0), (i * NODE_SIZE, HEIGHT))
+        pygame.draw.line(WIN, (200, 200, 200), (i * NODE_SIZE, 0), (i * NODE_SIZE, WIDTH))
         pygame.draw.line(WIN, (200, 200, 200), (0, i * NODE_SIZE), (WIDTH, i * NODE_SIZE))
 
     pygame.display.update()
@@ -87,33 +90,85 @@ def get_clicked_pos():
 
 # Functions to handle painting and erasing nodes with mouse
 def paint_node_with_mouse(mouse_pos, grid):
-    global start_exist, end_exist
+    global start_node, end_node
     row, col = mouse_pos
     node = grid[row][col]
     if node.color == node.COLORS['WHITE']:
-        if not start_exist:
+        if start_node is None:
             node.set_node_type('start')
-            start_exist = True
-        elif not end_exist:
+            start_node = node
+        elif end_node is None:
             node.set_node_type('end')
-            end_exist = True
+            end_node = node
         else:
             node.set_node_type('wall')
 
 def erase_node_with_mouse(mouse_pos, grid):
-    global start_exist, end_exist
+    global start_node, end_node
     row, col = mouse_pos
     node = grid[row][col]
     if node.color == node.COLORS['RED']:
-        start_exist = False
+        start_node = None
     elif node.color == node.COLORS['GREEN']:
-        end_exist = False
+        end_node = None
     node.set_node_type('empty')
 
-def reset_grid(grid):
-    global start_exist, end_exist
-    for row in grid:
-        for node in row:
-            node.set_node_type('empty')
-    start_exist = False
-    end_exist = False
+# Manhattan distance heuristic
+def heuristic(a, b):
+    return abs(a.x - b.x) + abs(a.y - b.y)
+
+# A * Algorithm Implementation
+def a_star_algorithm(start, end, grid):
+    open_set = []
+    open_set.append(start)
+    start.g = 0
+    start.h = heuristic(start, end)
+    start.f = start.h
+
+    came_from = {}
+
+    while open_set:
+        current = min(open_set, key=lambda node: node.f)
+
+        if current == end:
+            reconstruct_path(came_from, end, grid)
+            return True
+
+        open_set.remove(current)
+
+        for neighbor in current.neighbors:
+            if neighbor.color == node.Node.COLORS['BLACK']:
+                continue
+
+            tentative_g = current.g + 1
+
+            if tentative_g < neighbor.g:
+                came_from[neighbor] = current
+                neighbor.g = tentative_g
+                neighbor.h = heuristic(neighbor, end)
+                neighbor.f = neighbor.g + neighbor.h
+
+                if neighbor not in open_set:
+                    open_set.append(neighbor)
+                    if neighbor.color != node.Node.COLORS['GREEN']:
+                        neighbor.set_node_type('open')
+
+        if current.color != node.Node.COLORS['RED']:
+            current.set_node_type('closed')
+
+        draw_grid(grid)
+        pygame.display.update()
+
+    return False
+
+def reconstruct_path(came_from, current, grid):
+    while current in came_from:
+        current = came_from[current]
+        if current.color != node.Node.COLORS['RED']:
+            current.set_node_type('path')
+            draw_grid(grid)
+            pygame.display.update()
+
+if __name__ == "__main__":
+    main()
+
