@@ -2,6 +2,8 @@
 
 A simple implementation of the A* pathfinding algorithm with a visual interface. This project demonstrates how A* efficiently finds the shortest path between two points on a grid, avoiding obstacles.
 
+![App Screenshot](app_screenshot.png)
+
 ## Requirements
 
 - Python 3.7+
