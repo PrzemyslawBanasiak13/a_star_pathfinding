@@ -1,2 +1,4 @@
-__pycache__/
-*.pyc
+.vscode/
+py/__pycache__/
+py/*.pyc
+cpp/aStar
