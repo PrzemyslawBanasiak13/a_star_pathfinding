@@ -20,7 +20,7 @@ pip install pygame
 1. Clone the repository:
     ```bash
     git clone https://github.com/PrzemyslawBanasiak13/a_star_pathfinding.git
-    cd a_star_pathfinding
+    cd a_star_pathfinding/py
     ```
 2. Run the application:
     ```bash
