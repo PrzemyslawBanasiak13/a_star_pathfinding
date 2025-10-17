@@ -12,18 +12,18 @@ const float WINDOW_SIZE = 800;
 const float NODES_PER_ROW_COL = 20;
 const float NODE_SIZE = WINDOW_SIZE/NODES_PER_ROW_COL;
 
-void initNeighboursAndPos(std::vector<std::vector<Node>> &grid);
+void initNeighboursAndPos(std::vector<std::vector<Node>> &grid); //todo: split to initNeighboors and initPos
 void drawGrid(sf::RenderWindow &window);
 void drawNodes(std::vector<std::vector<Node>> &grid, sf::RenderWindow &win);
 void paintNode(std::vector<std::vector<Node>> &grid, bool &startExist, bool &endExist, int nodeX, int nodeY);
 void clearNode(std::vector<std::vector<Node>> &grid, bool &startExist, bool &endExist, int nodeX, int nodeY);
 // void aStar(){}
+// void resetGrid
 
 int main()
 {
     // Initialize grid
     std::vector<std::vector<Node>> grid(NODES_PER_ROW_COL, std::vector<Node>(NODES_PER_ROW_COL));
-    initNeighboursAndPos(grid);
     bool startExist = false;
     bool endExist = false;
 
@@ -82,7 +82,7 @@ void initNeighboursAndPos(std::vector<std::vector<Node>> &grid){
             grid[i][j].x = i;
             grid[i][j].y = j;
             if (i > 0) { grid[i][j].neighbors.push_back(&grid[i-1][j]);}
-            if (i < NODES_PER_ROW_COL-2) {grid[i][j].neighbors.push_back(&grid[i+1][j]);}
+            if (i < NODES_PER_ROW_COL-2) {grid[i][j].neighbors.push_back(&grid[i+1][j]);} //todo: move do separate func
             if (j > 0) {grid[i][j].neighbors.push_back(&grid[i][j-1]);}
             if (j < NODES_PER_ROW_COL-2) {grid[i][j].neighbors.push_back(&grid[i][j+1]);}
         }
