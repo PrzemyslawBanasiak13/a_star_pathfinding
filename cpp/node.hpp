@@ -18,6 +18,7 @@ inline constexpr float INF_COST = std::numeric_limits<float>::infinity();
 
 class Node {
 public:
+    int x = 0, y = 0;
     NodeType type = NodeType::Empty; // Type of the node
 
     float gCost = INF_COST; // Cost from start to current node
