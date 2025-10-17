@@ -15,6 +15,8 @@ const float NODE_SIZE = WINDOW_SIZE/NODES_PER_ROW_COL;
 void initNeighboursAndPos(std::vector<std::vector<Node>> &grid);
 void drawGrid(sf::RenderWindow &window);
 void drawNodes(std::vector<std::vector<Node>> &grid, sf::RenderWindow &win);
+void paintNode(std::vector<std::vector<Node>> &grid, bool &startExist, bool &endExist, int nodeX, int nodeY);
+void clearNode(std::vector<std::vector<Node>> &grid, bool &startExist, bool &endExist, int nodeX, int nodeY);
 // void aStar(){}
 
 int main()
@@ -22,19 +24,44 @@ int main()
     // Initialize grid
     std::vector<std::vector<Node>> grid(NODES_PER_ROW_COL, std::vector<Node>(NODES_PER_ROW_COL));
     initNeighboursAndPos(grid);
+    bool startExist = false;
+    bool endExist = false;
 
     // Create Window
-    sf::RenderWindow window(sf::VideoMode({WINDOW_SIZE, WINDOW_SIZE}), "My window");
+    sf::RenderWindow window(sf::VideoMode({(int)WINDOW_SIZE, (int)WINDOW_SIZE}), "My window");
     sf::Clock clock;
     window.setFramerateLimit(60);
 
     // Loop
-    while (window.isOpen())
-    {
-        while (const std::optional event = window.pollEvent())
-        {
+    while (window.isOpen()){
+        while (const std::optional event = window.pollEvent()){
             if (event->is<sf::Event::Closed>())
                 window.close();
+        }
+
+        // Paint node on left mouse click
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+            // Get global mouse position
+            sf::Vector2i position = sf::Mouse::getPosition(window);
+            if ((position.x > 0) && (position.x < WINDOW_SIZE) && (position.y > 0) && (position.y < WINDOW_SIZE)){
+                int nodeX = position.x / NODE_SIZE;
+                int nodeY = position.y / NODE_SIZE;
+                if (grid[nodeX][nodeY].type == NodeType::Empty){
+                    paintNode(grid, startExist, endExist, nodeX, nodeY);
+                }
+            }
+        }
+        // Clear node on right mouse click
+        else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
+            // Get global mouse position
+            sf::Vector2i position = sf::Mouse::getPosition(window);
+            if ((position.x > 0) && (position.x < WINDOW_SIZE) && (position.y > 0) && (position.y < WINDOW_SIZE)){
+                int nodeX = position.x / NODE_SIZE;
+                int nodeY = position.y / NODE_SIZE;
+                if (grid[nodeX][nodeY].type != NodeType::Empty){
+                    clearNode(grid, startExist, endExist, nodeX, nodeY);
+                }
+            }
         }
 
         // Clear the window
@@ -66,7 +93,7 @@ void drawGrid(sf::RenderWindow &win){
     // Draw horizontal lines
     for(int i = 0; i <= NODES_PER_ROW_COL; i++){
         sf::RectangleShape line({WINDOW_SIZE, 1.f});
-        line.setPosition({0.f, (NODE_SIZE)*i - 0.5});
+        line.setPosition({0.f, (NODE_SIZE)*i - 0.5f});
         line.setFillColor(sf::Color(125, 125, 125));
         win.draw(line);
     }
@@ -74,7 +101,7 @@ void drawGrid(sf::RenderWindow &win){
     // Draw vertical lines
     for(int i = 0; i <= NODES_PER_ROW_COL; i++){
         sf::RectangleShape line({1.f, WINDOW_SIZE});
-        line.setPosition({(NODE_SIZE)*i - 0.5, 0.f});
+        line.setPosition({(NODE_SIZE)*i - 0.5f, 0.f});
         line.setFillColor(sf::Color(125, 125, 125));
         win.draw(line);
     }
@@ -83,7 +110,7 @@ void drawGrid(sf::RenderWindow &win){
 void drawNodes(std::vector<std::vector<Node>> &grid, sf::RenderWindow &win){
     // Draw squares representing Nodes
     for(auto &row : grid) {
-        for(auto Node : row){
+        for(auto &Node : row){
             sf::RectangleShape rectangle({NODE_SIZE, NODE_SIZE});
             rectangle.setPosition({Node.x * NODE_SIZE, Node.y * NODE_SIZE});
 
@@ -95,11 +122,21 @@ void drawNodes(std::vector<std::vector<Node>> &grid, sf::RenderWindow &win){
                 case NodeType::Path : rectangle.setFillColor(sf::Color::Blue); break;
                 case NodeType::Open : rectangle.setFillColor(sf::Color::Yellow); break;
                 case NodeType::Closed : rectangle.setFillColor(sf::Color::Cyan); break;
-
-            win.draw(rectangle);
             }
+             win.draw(rectangle);
         }
     }
 }
 
+void paintNode(std::vector<std::vector<Node>> &grid, bool &startExist, bool &endExist, int nodeX, int nodeY){
+    if (!startExist) {grid[nodeX][nodeY].type = NodeType::Start; startExist = true;}
+    else if (!endExist) {grid[nodeX][nodeY].type = NodeType::End; endExist = true;}
+    else {grid[nodeX][nodeY].type = NodeType::Wall;}
+}
+
+void clearNode(std::vector<std::vector<Node>> &grid, bool &startExist, bool &endExist, int nodeX, int nodeY){
+    if (grid[nodeX][nodeY].type == NodeType::Start) {grid[nodeX][nodeY].type = NodeType::Empty; startExist = false;}
+    else if (grid[nodeX][nodeY].type == NodeType::End) {grid[nodeX][nodeY].type = NodeType::Empty; endExist = false;}
+    else {grid[nodeX][nodeY].type = NodeType::Empty;}
+}
 
