@@ -18,7 +18,8 @@ inline constexpr float INF_COST = std::numeric_limits<float>::infinity();
 
 class Node {
 public:
-    int x = 0, y = 0;
+    int x = 0;     // add setters, getters
+    int y = 0;
     NodeType type = NodeType::Empty; // Type of the node
 
     float gCost = INF_COST; // Cost from start to current node
@@ -28,10 +29,7 @@ public:
     std::vector<Node*> neighbors; // Adjacent nodes
     Node* parent = nullptr; // Pointer to parent node for path reconstruction
 
-    Node()
-      : type(NodeType::Empty), gCost(INF_COST), hCost(INF_COST), parent(nullptr) {}
-
-    void reset() {
+    inline void reset() {
         type = NodeType::Empty;
         gCost = INF_COST;
         hCost = INF_COST;

@@ -1,4 +1,7 @@
+.clang-format
 .vscode/
 py/__pycache__/
 py/*.pyc
-cpp/aStar
+/cpp/aStar
+/build_cpp
+/venv
