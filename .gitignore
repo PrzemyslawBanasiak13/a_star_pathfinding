@@ -2,6 +2,5 @@
 .vscode/
 py/__pycache__/
 py/*.pyc
-/cpp/aStar
 /build_cpp
 /venv
